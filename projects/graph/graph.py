@@ -110,11 +110,13 @@ class Graph:
 
         if visited is None:
             visited = set()
-        
+
+        visited.add(starting_vertex)
         print(starting_vertex)
 
         for n in self.get_neighbors(starting_vertex):
-            self.dft_recursive(n)
+            if n not in visited:
+                self.dft_recursive(n,visited)
 
     def bfs(self, starting_vertex, destination_vertex):
         # Create an empty queue and enqueue A PATH TO the starting vertex ID
