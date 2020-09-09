@@ -119,37 +119,47 @@ class Graph:
                 self.dft_recursive(n,visited)
 
     def bfs(self, starting_vertex, destination_vertex):
-        # Create an empty queue and enqueue A PATH TO the starting vertex ID
-        # Create a Set to store visited vertices
-        # While the queue is not empty...
-        # Dequeue the first PATH
-        # Grab the last vertex from the PATH
-        # If that vertex has not been visited...
-        # CHECK IF IT'S THE TARGET
-        # IF SO, RETURN PATH
-        # Mark it as visited...
-        # Then add A PATH TO its neighbors to the back of the queue
-        # COPY THE PATH
-        # APPEND THE NEIGHOR TO THE BACK
-        pass
+
+        to_visit = Queue()
+        to_visit.enqueue([starting_vertex])
+
+        while to_visit.size() > 0:
+            v = to_visit.dequeue()
+            last_vert = v[-1]
+
+            if last_vert == destination_vertex:
+                return v
+
+            for n in self.get_neighbors(last_vert):
+                to_visit.enqueue(v + [n])
 
     def dfs(self, starting_vertex, destination_vertex):
-        """
-        Return a list containing a path from
-        starting_vertex to destination_vertex in
-        depth-first order.
-        """
-        pass  # TODO
 
-    def dfs_recursive(self, starting_vertex, destination_vertex):
-        """
-        Return a list containing a path from
-        starting_vertex to destination_vertex in
-        depth-first order.
+        to_visit = Stack()
+        to_visit.push([starting_vertex])
 
-        This should be done using recursion.
-        """
-        pass  # TODO
+        while to_visit.size() > 0:
+            path = to_visit.pop()
+            v = path[-1]
+
+            if v == destination_vertex:
+                return path
+
+            for n in self.get_neighbors(v):
+                to_visit.push(path + [n])
+
+    def dfs_recursive(self, starting_vertex, destination_vertex, path=[]):
+        path = path + [starting_vertex]
+
+        if starting_vertex == destination_vertex:
+            return path
+
+        for n in self.get_neighbors(starting_vertex):
+            if n not in path:
+                temp_path = self.dfs_recursive(n, destination_vertex, path)
+                if temp_path: return temp_path
+
+        return None
 
 
 if __name__ == '__main__':
