@@ -123,6 +123,7 @@ class Graph:
         to_visit = Queue()
         to_visit.enqueue([starting_vertex])
 
+        #
         while to_visit.size() > 0:
             v = to_visit.dequeue()
             last_vert = v[-1]

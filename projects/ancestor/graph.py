@@ -85,7 +85,7 @@ class Graph:
         # Create a set to hold visited nodes
         visited = set()
 
-        # Initalize: add the starting node to the stack
+        # Initialize: add the starting node to the stack
         to_visit.push(starting_vertex)
 
         # While STACK not empty:
@@ -93,17 +93,15 @@ class Graph:
             # remove the last entry
             v = to_visit.pop()
 
-            # if LAST ENTRY not visited:
+            # if LAST ENTRY of the stack not visited:
             if v not in visited:
-                # Visit the node (print it out)
                 print(v)
 
-                # Add it to the visited set
+                # Add it to visited
                 visited.add(v)
 
                 # add all its neighbors to the end of the stack
                 for n in self.get_neighbors(v):
-                    # print(f"Adding: {n}")
                     to_visit.push(n)
 
     def dft_recursive(self, starting_vertex, visited=None):
@@ -216,9 +214,9 @@ if __name__ == '__main__':
         1, 2, 4, 6, 3, 5, 7
     '''
     # print('DFT START')
-    # graph.dft(2)
+    graph.dft(4)
     # print('DFT END')
-    graph.dft_recursive(1)
+    # graph.dft_recursive(1)
 
     '''
     Valid BFS path:
