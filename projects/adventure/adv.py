@@ -13,10 +13,10 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
-# map_file = "maps/test_cross.txt"
+map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-map_file = "maps/main_maze.txt"
+# map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph = literal_eval(open(map_file, "r").read())
@@ -27,15 +27,17 @@ world.print_rooms()
 
 player = Player(world.starting_room)
 
-
 ###########################################################################
+############################## Gloval Variables ###########################
 traversal_path = []
-graph = {player.current_room.id: {direction:"?" for direction in player.current_room.get_exits()}}
-opp_dir = {'w':'e','e':'w','s':'n','n':'s'}
+graph = {player.current_room.id: {direction: "?" for direction in player.current_room.get_exits()}}
+opp_dir = {'w': 'e', 'e': 'w', 's': 'n', 'n': 's'}
 
-# Helper Functions
+
+############################### Helper Functions ##########################
 def print_loc():
     print(f'Current Location: {player.current_room.id}')
+
 
 # Picks a random unexplored direction
 def rand_unexplored(cur_room):
@@ -45,15 +47,17 @@ def rand_unexplored(cur_room):
         if unexplored_move in graph[cur_room] and graph[cur_room][unexplored_move] == '?':
             return unexplored_move
 
+
 # Checks if the graph rooms contain any ?s : returns True if any ?s are found
 def contains_qs():
-    moves = ['n','s','e','w']
+    moves = ['n', 's', 'e', 'w']
     for move in moves:
         for i in range(len(graph)):
             if graph[i][move] == '?':
                 return True
 
     return False
+
 
 # Finds all unexplored exits for a room
 def unexplored_exits(room):
@@ -67,6 +71,8 @@ def unexplored_exits(room):
     # Return unexplored exits
     return unexplored
 
+
+# Picks a random path, heads that way until dead end reached.
 def dft(starting_room):
     # Loop until all exits are explored.
     while len(unexplored_exits(starting_room)) > 0:
@@ -96,19 +102,92 @@ def dft(starting_room):
         # Repeat process
         starting_room = cur
 
+
+# Find and take shortest path to the nearest room with unexplored exits -- allows us to take reverse path
 def bft(node, starting_room):
-    pass
+    to_visit = [[starting_room]]
+    visited = set()
 
+    room_path = list()
+
+    while len(to_visit) > 0:
+        print(f'To Visit: {to_visit}')
+        # Dequeue first entry and store it
+        v = to_visit.pop(0)
+        print(v)
+        print(f'To Visit: {to_visit}')
+        print(f'Visited: {visited}')
+
+        # If that entry isn't in visited, add it
+        if v[-1] not in visited:
+            visited.add(v[-1])
+
+            # If visited, at the last index, is the node we're looking for, return it
+            # And add it to the room_path taken, break loop
+            if v[-1] == node:
+                room_path = v
+                break
+
+            # Appends the reverse order to to_visit
+            for room in list(graph[v[-1]].values()):
+                list_copy = list(v) + [room]
+                print(f'List Copy: {list_copy}')
+                to_visit.append(list_copy)
+
+    path_to_travel = []
+    print(f'Room Path: {room_path}')
+
+    # Reverse path store
+    for i in range(len(room_path) - 1):
+        for direction in graph[room_path[i]]:
+            if graph[room_path[i]][direction] == room_path[i + 1]:
+                path_to_travel.append(direction)
+
+    # Adds the directions to the traversal path and moves player
+    for direction_traveled in path_to_travel:
+        player.travel(direction_traveled)
+        traversal_path.append(direction_traveled)
+
+
+# Finds the nearest room with unexplored exits
 def bfs(starting_room):
-    pass
+    to_visit = [starting_room]
+    visited = set()
+
+    while len(to_visit) > 0:
+        v = to_visit.pop(0)
+
+        if v not in visited:
+            visited.add(v)
+
+            if len(unexplored_exits(v)) > 0:
+                return v
+            for room in list(graph[v].values()):
+                to_visit.append(room)
 
 
-# Main Program - loops until 500 entries in graph
+###########################################################
+
+##################### Main Loop ###########################
+'''
+--> KILL SWITCH: REPEAT UNTIL ALL ROOMS HAVE BEEN VISITED AT LEAST ONCE <--
+--> TRAVEL UNTIL DEAD END REACHED - LOG THE PATH TAKEN
+--> PERFORM SEARCH TO FIND THE NEAREST ROOM WITH UNEXPLORED EXITS
+--> TRAVEL TO SAID LOCATION - LOG THE PATH TAKEN
+'''
 while len(graph) < len(room_graph):
+    # Travels to a dead end
     dft(player.current_room.id)
 
+    # Finds nearest room with unexplored exits
+    room_unexplored_exits = bfs(player.current_room.id)
 
-##########################################w################
+    # Takes us to the nearest room with unexplored exits
+    bft(room_unexplored_exits, player.current_room.id)
+
+    print(f'Traversal Path: {traversal_path}')
+
+###########################################################
 
 
 # TRAVERSAL TEST
@@ -238,7 +317,6 @@ while len(visited_exits) < len(room_graph):
     print(f'player loc: {player.current_room.id}')
 print(traversal_path)
 '''
-
 
 '''
     # FOR TESTING
