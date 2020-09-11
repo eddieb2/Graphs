@@ -1,6 +1,7 @@
 from room import Room
 from player import Player
 from world import World
+from util import Queue
 from util import Stack
 from random import random
 
@@ -10,7 +11,6 @@ from ast import literal_eval
 # Load world
 world = World()
 
-
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
 map_file = "maps/test_cross.txt"
@@ -19,7 +19,7 @@ map_file = "maps/test_cross.txt"
 # map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
-room_graph=literal_eval(open(map_file, "r").read())
+room_graph = literal_eval(open(map_file, "r").read())
 world.load_graph(room_graph)
 
 # Print an ASCII map
@@ -27,93 +27,55 @@ world.print_rooms()
 
 player = Player(world.starting_room)
 
-# Fill this out with directions to walk
-# traversal_path = ['n', 'n']
-# traversal_path = []
-# ^^ You are responsible for filling traversal_path with directions that
-# , when walked in order, will visit every room on the map at least once.
 
-'''
-####### Brain Storming #######
-
-MAIN GOAL -  add moves to the traversal_path to walk all the rooms. ** eventually work on efficiency ** 
-          -  to start, get player to just move all through all the rooms
-
-What type of traversal method should we use? 
-- Breadth first
-        -The Breadth First Search (BFS) traversal is an algorithm, which is used to visit all of the nodes of a given graph. 
-        In this traversal algorithm one node is selected and then all of the adjacent nodes are visited one by one. 
-        After completing all of the adjacent vertices, it moves further to check another vertices and checks its adjacent vertices again.
-- ===================> Depth first <===================
-        -The Depth First Search (DFS) is a graph traversal algorithm. 
-        In this algorithm one starting vertex is given, and when an adjacent vertex is found, 
-        it moves to that adjacent vertex first and try to traverse in the same manner.
-
-
-#########################
-'''
 ###########################################################################
-#help fxns
-def print_visited(string=None):
-    print(f'{string} - Visited Exits {visited_exits}')
-
-def print_avail(string=None):
-    print(f'{string} - Available Exits {available_exits}')
-
-# visited exits
-visited_exits = {}
-# available exits
-available_exits = {}
-# directions to travel
 traversal_path = []
-opp_dir = {'n': 's', 's': 'n', 'w': 'e' ,'e': 'w',}
+graph = {player.current_room.id: {direction:"?" for direction in player.current_room.get_exits()}}
+opp_dir = {'w':'e','e':'w','s':'n','n':'s'}
 
-# for i in range(len(room_graph)):
-#     visited_exits[i] = []
+# Helper Functions
+def print_loc():
+    print(f'Current Location: {player.current_room.id}')
 
-# visited_exits[player.current_room.id] = []
+# Picks a random unexplored direction
+def rand_unexplored(cur_room):
+    found = False
+    while found is False:
+        unexplored_move = random.choice(player.current_room.get_exits())
+        if unexplored_move in graph[cur_room] and graph[cur_room][unexplored_move] == '?':
+            return unexplored_move
 
-# print_visited('Outside')
-# print_avail('Outside')
+# Checks if the graph rooms contain any ?s : returns True if any ?s are found
+def contains_qs():
+    moves = ['n','s','e','w']
+    for move in moves:
+        for i in range(len(graph)):
+            # if move not in graph[i]:
+            #     continue
+            # if i not in graph:
+            #     continue
+            if graph[i][move] == '?':
+                return True
 
-# loop until all rooms have been visited
-while len(visited_exits) < len(room_graph):
-    # find all exits
-    exits = player.current_room.get_exits()
-    # add found exits to the available exits var
-    available_exits[player.current_room.id] = exits
-    # print_avail('Inside')
+    return False
 
-    # initialize visited exits with the cur room as it's key with empty arr value
+def dft():
+    pass
 
-    # visited_exits[player.current_room.id] = []
-    if player.current_room.id not in visited_exits:
-        visited_exits[player.current_room.id] = []
-    prev_move = None
-    # randomly select an exit and move there
-    # add index + direction moved to visited
-    found_move = False
-    # loop and generate random choice until choice isn't in visited exits, then move
-    while found_move is False:
+def bft():
+    pass
 
-        rand_direction = random.choice(available_exits[player.current_room.id])
-
-        if rand_direction not in visited_exits:
-            found_move = True
-            # add move the traversal path
-            traversal_path.append(rand_direction)
-            # add exit taken to visited exit
-
-            visited_exits[player.current_room.id].append(rand_direction)
-            player.travel(rand_direction)
+def bfs():
+    pass
 
 
-    print_visited()
-    print(f'player loc: {player.current_room.id}')
-print(traversal_path)
+# Main Program - loops until 500 entries in graph and no ?s
+while len(graph) < len(room_graph) and contains_qs() == True:
+    pass
 
+    print(graph)
 
-##########################################################
+##########################################w################
 
 
 # TRAVERSAL TEST
@@ -130,8 +92,6 @@ if len(visited_rooms) == len(room_graph):
 else:
     print("TESTS FAILED: INCOMPLETE TRAVERSAL")
     print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
-
-
 
 #######
 # UNCOMMENT TO WALK AROUND
@@ -167,8 +127,6 @@ before you can add it to your traversal path.
 If all paths have been explored, you're done!
 '''
 
-
-
 '''
 --------------
   saved code
@@ -195,4 +153,81 @@ while len(visited_exits) < len(room_graph):
 
     print(player.current_room.id)
     print(visited_exits)
+    
+    -----------------------------
+    
+    # help fxns
+def print_visited(string=None):
+    print(f'{string} - Visited Exits {visited_exits}')
+
+
+def print_avail(string=None):
+    print(f'{string} - Available Exits {available_exits}')
+
+
+# visited exits
+visited_exits = {}
+# available exits
+available_exits = {}
+# directions to travel
+traversal_path = []
+opp_dir = {'n': 's', 's': 'n', 'w': 'e', 'e': 'w', }
+
+# loop until all rooms have been visited
+while len(visited_exits) < len(room_graph):
+    # find all exits
+    exits = player.current_room.get_exits()
+    # add found exits to the available exits var
+    available_exits[player.current_room.id] = exits
+    # print_avail('Inside')
+
+    # initialize visited exits with the cur room as it's key with empty arr value
+
+    if player.current_room.id not in visited_exits:
+        visited_exits[player.current_room.id] = []
+
+    found_move = False
+    # loop and generate random choice until choice isn't in visited exits, then move
+    while found_move is False:
+
+        rand_direction = random.choice(available_exits[player.current_room.id])
+
+        if rand_direction not in visited_exits[player.current_room.id]:
+            found_move = True
+            # add move the traversal path
+            traversal_path.append(rand_direction)
+            # add exit taken to visited exit
+
+            visited_exits[player.current_room.id].append(rand_direction)
+            player.travel(rand_direction)
+
+    print_visited()
+    print(f'player loc: {player.current_room.id}')
+print(traversal_path)
+'''
+
+
+'''
+    # FOR TESTING
+    order.append(player.current_room.id)
+
+    cur_room = player.current_room.id
+
+    # Pick random move
+    random_move = rand_unexplored(player.current_room.id)
+
+    # Move in that direction
+    player.travel(random_move)
+
+    # Adds the next room to the cur room's
+    graph[cur_room][random_move] = player.current_room.id
+
+    # Add move to graph
+    graph[player.current_room.id] = {direction:"?" for direction in player.current_room.get_exits()}
+
+    # Add the previous room the the opp direction of the random direction chosen
+    graph[player.current_room.id][opp_dir[random_move]] = cur_room
+
+    # Add direction to traversal path
+    traversal_path.append(random_move)
 '''
