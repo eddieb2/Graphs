@@ -13,10 +13,10 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
-map_file = "maps/test_cross.txt"
+# map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph = literal_eval(open(map_file, "r").read())
@@ -50,30 +50,63 @@ def contains_qs():
     moves = ['n','s','e','w']
     for move in moves:
         for i in range(len(graph)):
-            # if move not in graph[i]:
-            #     continue
-            # if i not in graph:
-            #     continue
             if graph[i][move] == '?':
                 return True
 
     return False
 
-def dft():
+# Finds all unexplored exits for a room
+def unexplored_exits(room):
+    unexplored = []
+
+    # Loop through all exits the in room. If exit contains a ? , add to unexplored.
+    for exit in graph[room]:
+        if graph[room][exit] == "?":
+            unexplored.append(exit)
+
+    # Return unexplored exits
+    return unexplored
+
+def dft(starting_room):
+    # Loop until all exits are explored.
+    while len(unexplored_exits(starting_room)) > 0:
+        # Choose random direction to travel.
+        random_direction = random.choice(unexplored_exits(starting_room))
+
+        # Save previous room.
+        prev = player.current_room.id
+        # Travel in the chosen random direction.
+        player.travel(random_direction)
+        # Save current room after travel.
+        cur = player.current_room.id
+        # Add the direction moved to the traversal path.
+        traversal_path.append(random_direction)
+
+        # Initialize the key in the graph so no errors are thrown.
+        if cur not in graph:
+            graph[cur] = {direction: "?" for direction in player.current_room.get_exits()}
+
+        # For the current room, this will set the opposite direction of what was just traveled, to the previous room
+        # I.E - prev = {0: n:1 s:? e:? w:?}  -> cur  = {1: s:0 s:? e:? w:?}
+        graph[cur][opp_dir[random_direction]] = prev
+
+        # For the previous room, set the direction moved, to the current room we're on.
+        graph[prev][random_direction] = cur
+
+        # Repeat process
+        starting_room = cur
+
+def bft(node, starting_room):
     pass
 
-def bft():
-    pass
-
-def bfs():
+def bfs(starting_room):
     pass
 
 
-# Main Program - loops until 500 entries in graph and no ?s
-while len(graph) < len(room_graph) and contains_qs() == True:
-    pass
+# Main Program - loops until 500 entries in graph
+while len(graph) < len(room_graph):
+    dft(player.current_room.id)
 
-    print(graph)
 
 ##########################################w################
 
@@ -230,4 +263,22 @@ print(traversal_path)
 
     # Add direction to traversal path
     traversal_path.append(random_move)
+    
+    
+    
+    -----------------------------------------------------------------
+        cur_room = player.current_room.id
+    # If current room isn't in the graph, add it.
+    if cur_room not in graph:
+        graph[cur_room] = {direction: "?" for direction in player.current_room.get_exits()}
+
+    # Choose random direction to travel.
+    random_dir = rand_unexplored(cur_room)
+
+    # Travel
+    player.travel(random_dir)
+
+    # Add traveled direction to the traversal path.
+    traversal_path.append(random_dir)
+
 '''
